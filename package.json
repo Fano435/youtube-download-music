@@ -1,0 +1,14 @@
+{
+  "name": "youtube_downloader",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Convertisseur YouTube vers MP3 avec frontend Next.js et backend Express en TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.19.0"
+}
