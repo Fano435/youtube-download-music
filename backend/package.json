@@ -21,7 +21,8 @@
     "child_process": "^1.0.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "youtubei.js": "^16.0.1",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7",
     "ytdl-core": "^4.11.5"
   }
 }
