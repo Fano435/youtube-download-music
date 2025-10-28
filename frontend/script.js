@@ -1,6 +1,7 @@
 const bar = document.getElementById("bar");
 const form = document.getElementById("convert-form");
 const url = form.querySelector("#video-url");
+const page = document.querySelector(".global");
 
 function getFileNameFrom(header) {
   if (!header) return "audio.mp3";
@@ -18,14 +19,16 @@ function getFileNameFrom(header) {
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    url.blur();
+    page.classList.add("non-clickable");
     bar.textContent = "Conversion en cours...";
-
+    
     try {
         const response = await(fetch(`http://localhost:3000/convert?url=${encodeURI(url.value)}`))
         if (!response.ok){
             throw new Error("Server error")
         }
-
+        
         const contentDisposition = response.headers.get("Content-Disposition");
         const contentLength = response.headers.get("Content-Length");
         console.log(contentDisposition, contentLength)
@@ -47,18 +50,18 @@ form.addEventListener("submit", async (e) => {
                 bar.textContent = "Téléchargement terminé !";
                 return ;
             }
-
+            
             chunks.push(value);
             receivedLength += value.length;
             console.log("Bits received", receivedLength)
             return reader.read().then(processAudio);
         })
-
+        
     }
     catch (err) {
         console.log(err)
         bar.textContent = "Erreur: Conversion failed"
     }
-
+    page.classList.remove("non-clickable");
     url.value = "";
 })

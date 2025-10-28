@@ -77,6 +77,10 @@ input {
     background-color: lightgrey;
 }
 
+.non-clickable {
+    pointer-events: none;
+}
+
 /* 
 #progress {
     width: 0%;
