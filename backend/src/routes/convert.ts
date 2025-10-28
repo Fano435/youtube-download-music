@@ -1,6 +1,6 @@
 import { Router } from "express";
 import ytdl from "ytdl-core";
-import { spawn } from "child_process";
+import { spawn, execSync} from "child_process";
 import fs from "fs";
 import path from "path";
 
@@ -8,32 +8,37 @@ const router = Router();
 
 router.get("/", async (req, res) => {
     const videoUrl = req.query.url as string;
-    console.log("URL reçue :", videoUrl)
-
-    if (!videoUrl || !ytdl.validateURL(videoUrl)) {
-        return res.status(400).send("Missing or unvalid YouTube URL");
-    }
     
-    const outputFile = path.join("/tmp", `audio_${Date.now()}.mp3`)
+    if (!videoUrl || !ytdl.validateURL(videoUrl)) {
+      return res.status(400).send("Missing or unvalid YouTube URL");
+    }
+    // console.log("URL reçue :", videoUrl)
+    
+    const rawTitle = execSync(`yt-dlp --get-title ${videoUrl}`).toString().trim()
+    const filename = rawTitle.replace(/[^\w\s()\[\]-]/g, "").replace(/\s+/g, " ")
+
+    // console.log("Music Title : ", rawTitle)
+    // console.log("Filename : ", filename)
+    const tmpFile = path.join("/tmp", `audio_${Date.now()}.mp3`)
 
     // Lancement du child process yt-dlp
     const ytdlp = spawn("yt-dlp", [
     "-f", "bestaudio",
     "-x", "--audio-format", "mp3",
-    "-o", outputFile,
+    "-o", tmpFile,
     videoUrl
     ])
 
-     // On log les erreurs de yt-dlp
+    // On log les erreurs de yt-dlp
     ytdlp.stderr.on("data", data => { console.error("yt-dlp:", data.toString()); })
 
     // Quand yt-dlp se termine
     ytdlp.on("close", code => {
     if (code === 0) {
         // conversion terminée → on envoie le fichier au client
-        res.download(outputFile, "audio.mp3", err => {
+        res.download(tmpFile, `${filename}.mp3`, err => {
         if (err) console.error("Erreur d’envoi:", err);
-        fs.unlink(outputFile, () => {}); // suppression du fichier temporaire
+        fs.unlink(tmpFile, () => {}); // suppression du fichier temporaire
       });
     } 
     else {

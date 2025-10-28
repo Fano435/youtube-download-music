@@ -9,14 +9,18 @@
 </head>
 <body>
     <div class="global">
-        <div class="header"></div>
+        <div class="header">
+
+        </div>
         <div class="container">
             <h1 class="page-title">Youtube to mp3 converter</h1>
                 <form id="convert-form">
                     <input type="url" id="video-url" required>
                     <button type="submit" class="btn">convert</button>
                 </form>
-                <div id="status"></div>
+                <div id="bar" class="hidden">
+                    <div id="progress"></div>
+                </div>
         </div>
     </div>
     <script src="script.js"></script>

@@ -5,7 +5,9 @@ import convertRoute from "./routes/convert.js"
 const app = express();
 const port = 3000;
 
-app.use(cors());
+app.use(cors({
+  exposedHeaders: ["Content-Disposition"]
+}));
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
