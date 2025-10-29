@@ -12,13 +12,9 @@ router.get("/", async (req, res) => {
     if (!videoUrl || !ytdl.validateURL(videoUrl)) {
       return res.status(400).send("Missing or unvalid YouTube URL");
     }
-    // console.log("URL reçue :", videoUrl)
     
     const rawTitle = execSync(`yt-dlp --get-title ${videoUrl}`).toString().trim()
     const filename = rawTitle.replace(/[^\w\s()\[\]-]/g, "").replace(/\s+/g, " ")
-
-    // console.log("Music Title : ", rawTitle)
-    // console.log("Filename : ", filename)
     const tmpFile = path.join("/tmp", `audio_${Date.now()}.mp3`)
 
     // Lancement du child process yt-dlp
@@ -35,10 +31,9 @@ router.get("/", async (req, res) => {
     // Quand yt-dlp se termine
     ytdlp.on("close", code => {
     if (code === 0) {
-        // conversion terminée → on envoie le fichier au client
         res.download(tmpFile, `${filename}.mp3`, err => {
         if (err) console.error("Erreur d’envoi:", err);
-        fs.unlink(tmpFile, () => {}); // suppression du fichier temporaire
+        fs.unlink(tmpFile, () => {});
       });
     } 
     else {
