@@ -12,5 +12,5 @@
     "typescript": "~5.9.3",
     "vite": "^7.1.7"
   },
-  "license": "CC-BY-NC-4.0"
+  "license": "MIT"
 }

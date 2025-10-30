@@ -17,6 +17,14 @@ body {
     line-height: 1;
 }
 
+select {
+    appearance: none;            /* Supprime la flèche native */
+    -webkit-appearance: none;    /* Pour Safari / Chrome */
+    -moz-appearance: none;       /* Pour Firefox */
+    background: none;
+    cursor: pointer;
+}
+
 button {
     background: none; /* supprime le style par défaut */
     color: inherit;

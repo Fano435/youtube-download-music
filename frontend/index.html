@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/reset.css">
     <link rel="stylesheet" href="style/style.css">
-    <title>Youtube downloader</title>
+    <title>Yt-dl</title>
 </head>
 <body>
     <div class="global">
@@ -13,13 +13,17 @@
 
         </div>
         <div class="container">
-            <h1 class="page-title">Youtube to mp3 converter</h1>
+            <h1 class="page-title">Youtube converter</h1>
                 <form id="convert-form">
-                    <input type="url" id="video-url" required>
-                    <button type="submit" class="btn">convert</button>
+                    <input type="url" id="video-url" required placeholder="Coller le lien ici">
+                    <select id="format" class="btn dropbtn">
+                        <option value="mp3">MP3</option>
+                        <option value="m4a">M4A</option>
+                        <option value="mp4">MP4</option>
+                    </select>
+                    <button type="submit" class="btn">ok</button>
                 </form>
-                <div id="bar" class="hidden">
-                    <div id="progress"></div>
+                <div id="status" class="hidden">
                 </div>
         </div>
     </div>

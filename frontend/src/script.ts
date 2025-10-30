@@ -1,12 +1,13 @@
 import { getFileNameFrom } from "./utils";
 
-const bar = document.getElementById("bar") as HTMLDivElement;
+const statusMsg = document.getElementById("status") as HTMLDivElement;
 const form = document.getElementById("convert-form") as HTMLFormElement;
 const urlInput = form.querySelector("#video-url") as HTMLInputElement;
+const formatSelect = form.querySelector("#format") as HTMLSelectElement;
 const page = document.querySelector(".global")!;
 
-async function downloadAudio (url: string) {
-    const response = await(fetch(`http://localhost:3000/convert?url=${encodeURI(url)}`))
+async function downloadAudio (url: string, format: string) {
+    const response = await fetch(`http://localhost:3000/convert?url=${encodeURIComponent(url)}&format=${encodeURIComponent(format)}`);
     if (!response.ok) throw new Error(`Server error: ${response.status}`)
 
     const contentDisposition = response.headers.get("Content-Disposition");
@@ -45,21 +46,22 @@ async function downloadAudio (url: string) {
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const format = formatSelect.value.trim();
     const videoUrl = urlInput.value.trim();
-    if (!videoUrl) return;
+    if (!videoUrl || !format) return;
 
     urlInput.blur();
     page.classList.add("non-clickable");
-    bar.textContent = "Conversion en cours ...";
+    statusMsg.textContent = "Conversion en cours ...";
     
     try {
-        await downloadAudio(videoUrl);
+        await downloadAudio(videoUrl, format);
 
-        bar.textContent = "Téléchargement terminé !";
+        statusMsg.textContent = "Téléchargement terminé !";
     }
     catch (err) {
         console.log(err)
-        bar.textContent = "Erreur: Conversion échouée"
+        statusMsg.textContent = "Erreur: Conversion échouée"
     } finally {
         page.classList.remove("non-clickable");
         urlInput.value = "";

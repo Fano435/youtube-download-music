@@ -22,8 +22,9 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "fs": "0.0.1-security",
+    "os": "^0.1.2",
     "path": "^0.12.7",
     "ytdl-core": "^4.11.5"
   },
-  "license": "CC-BY-NC-4.0"
+  "license": "MIT"
 }

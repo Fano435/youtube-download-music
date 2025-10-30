@@ -1,17 +1,29 @@
-# Convertisseur YouTube → MP3
+# YouTube converter → MP3
 
-Pour tous ceux qui veulent télécharger de la musique simplement comme à l'ancienne sans pubs 
+A simple web interface to download music (or videos) from Youtube for those who miss the old days — no ads, no tracking, no clutter.
+
+The project’s goal is both to deliver a smooth user experience and to serve as a practical learning project
+
+Note : As long as [yt-dlp](https://github.com/yt-dlp/yt-dlp) remains maintained, the site will stay reliable and stable.
 
 ## Installation
-### Prérequis
+### Prerequisites
 
 - **Node.js >= 18**
-- **Python 3** (nécessaire pour `yt-dlp`)
+- **Python 3** (required for `yt-dlp`)
 - **yt-dlp**
 
-### Développement
+*yt-dlp is a feature-rich command-line audio/video downloader with support for thousands of sites. The project is a fork of [youtube-dl](https://github.com/ytdl-org/youtube-dl) based on the now inactive youtube-dlc.*
 
-Clonez le dépôt, puis installez les dépendances du frontend et du backend :
+### Development
+
+Clone the repository
+```
+git clone https://github.com/Fano435/youtube-download-music.git
+cd youtube-download-music
+```
+
+Then install the frontend and backend dependencies :
 
 ```
 cd backend
@@ -19,11 +31,12 @@ pnpm install
 pnpm dev
 ```
 
-Dans un autre terminal :
+Open another shell :
 ```
 cd frontend
 pnpm install
 pnpm dev
 ```
-Le frontend est accessible à l’adresse affichée par Vite (par défaut http://localhost:5173).
+
+The frontend is accessible at the address displayed by Vite (default http://localhost:5173).
 
