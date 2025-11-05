@@ -6,18 +6,33 @@ const urlInput = form.querySelector("#video-url") as HTMLInputElement;
 const formatSelect = form.querySelector("#format") as HTMLSelectElement;
 const page = document.querySelector(".global")!;
 
-async function downloadAudio (url: string, format: string) {
-    const response = await fetch(`http://localhost:3000/convert?url=${encodeURIComponent(url)}&format=${encodeURIComponent(format)}`);
-    if (!response.ok) throw new Error(`Server error: ${response.status}`)
+async function downloadAudio(url: string, format: string) {
+    const response = await fetch(
+        `http://localhost:3000/convert?url=${encodeURIComponent(
+            url
+        )}&format=${encodeURIComponent(format)}`
+    );
+
+    if (!response.ok) {
+        // Try to read the JSON message returned by the server
+        let errorMessage = `Server error (${response.status})`;
+        try {
+            const data = await response.json();
+            if (data?.error) errorMessage = data.error;
+        } catch {
+            // If the response is not JSON, ignore and keep the default message
+        }
+
+        throw new Error(errorMessage);
+    }
 
     const contentDisposition = response.headers.get("Content-Disposition");
-    const total = Number(response.headers.get("Content-Length") ?? 0);
-    console.log(contentDisposition, total);
+    // const total = Number(response.headers.get("Content-Length") ?? 0);
+    // console.log(contentDisposition, total);
 
     const reader = response.body?.getReader();
     if (!reader) throw new Error("No readable stream returned by response");
-    
-    let receivedLength = 0;
+
     const chunks = [];
 
     while (true) {
@@ -26,8 +41,6 @@ async function downloadAudio (url: string, format: string) {
 
         if (value) {
             chunks.push(value);
-            receivedLength += value.length;
-            // console.log(receivedLength);
         }
     }
     const blob = new Blob(chunks, { type: "audio/mpeg" });
@@ -53,17 +66,16 @@ form.addEventListener("submit", async (e) => {
     urlInput.blur();
     page.classList.add("non-clickable");
     statusMsg.textContent = "Conversion en cours ...";
-    
+
     try {
         await downloadAudio(videoUrl, format);
 
         statusMsg.textContent = "Téléchargement terminé !";
-    }
-    catch (err) {
-        console.log(err)
-        statusMsg.textContent = "Erreur: Conversion échouée"
+    } catch (err) {
+        console.log(err);
+        statusMsg.textContent = `${err}`;
     } finally {
         page.classList.remove("non-clickable");
         urlInput.value = "";
     }
-})
+});

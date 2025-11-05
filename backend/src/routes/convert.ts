@@ -3,43 +3,44 @@ import ytdl from "ytdl-core";
 import { spawn, execSync} from "child_process";
 import fs from "fs";
 import path from "path";
+import os from "os";
+import { download } from "../services/ytdlp.js";
 
+export const MAXSIZE = "50M"
 const router = Router();
 
 router.get("/", async (req, res) => {
     const videoUrl = req.query.url as string;
+    const format = (req.query.format as string) || "mp3";
     
     if (!videoUrl || !ytdl.validateURL(videoUrl)) {
       return res.status(400).send("Missing or unvalid YouTube URL");
     }
     
-    const rawTitle = execSync(`yt-dlp --get-title ${videoUrl}`).toString().trim()
-    const filename = rawTitle.replace(/[^\w\s()\[\]-]/g, "").replace(/\s+/g, " ")
-    const tmpFile = path.join("/tmp", `audio_${Date.now()}.mp3`)
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "yt-dlp-"));
+    const tmpFile = path.join(tmpDir, `dl.${format}`)
 
-    // Lancement du child process yt-dlp
-    const ytdlp = spawn("yt-dlp", [
-    "-f", "bestaudio",
-    "-x", "--audio-format", "mp3",
-    "-o", tmpFile,
-    videoUrl
-    ])
+      try {
+        // Lancement du child process de téléchargement yt-dlp
+        await download(videoUrl, tmpFile, format);
 
-    // On log les erreurs de yt-dlp
-    ytdlp.stderr.on("data", data => { console.error("yt-dlp:", data.toString()); })
+        // Execution asynchrone car je suis obligé de récupérer le titre avant de déclencher le téléchargement du fichier vers le client
+        const rawTitle = execSync(`yt-dlp --get-title ${videoUrl}`).toString().trim()
+        const filename = rawTitle.replace(/[^\w\s()\[\]-]/g, "").replace(/\s+/g, " ")
 
-    // Quand yt-dlp se termine
-    ytdlp.on("close", code => {
-    if (code === 0) {
-        res.download(tmpFile, `${filename}.mp3`, err => {
-        if (err) console.error("Erreur d’envoi:", err);
-        fs.unlink(tmpFile, () => {});
-      });
-    } 
-    else {
-        res.status(500).json({ error: "Échec de la conversion" });
-    }
-  });
+        res.download(tmpFile, `${filename}.${format}`, err => {
+          if (err) {
+            res.status(500).json({ error: "Error sending file" }); 
+          }
+        });
+      }
+      catch (err) {
+        // console.log(err.message)
+        res.status(500).json({error: err.message})
+      }
+      finally {
+        fs.rm(tmpDir, { recursive: true, force: true}, () => {});
+      }
 
 });
 

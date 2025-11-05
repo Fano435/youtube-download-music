@@ -1,4 +1,4 @@
-export const getFileNameFrom = (header : string | null) => {
+export const getFileNameFrom = (header: string | null) => {
     if (!header) return "audio.mp3";
 
     // Tentative filename*
@@ -10,4 +10,4 @@ export const getFileNameFrom = (header : string | null) => {
     if (asciiMatch) return asciiMatch[1];
 
     return "audio.mp3";
-}
+};
