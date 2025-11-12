@@ -1,12 +1,12 @@
 import { Router } from "express";
 import ytdl from "ytdl-core";
-import { spawn, execSync} from "child_process";
+import { execSync} from "child_process";
 import fs from "fs";
 import path from "path";
 import os from "os";
 import { download } from "../services/ytdlp.js";
 
-export const MAXSIZE = "50M"
+export const MAXSIZE = "5G"
 const router = Router();
 
 router.get("/", async (req, res) => {
@@ -18,24 +18,25 @@ router.get("/", async (req, res) => {
     }
     
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "yt-dlp-"));
-    const tmpFile = path.join(tmpDir, `dl.${format}`)
 
       try {
         // Lancement du child process de téléchargement yt-dlp
-        await download(videoUrl, tmpFile, format);
+        await download(videoUrl, tmpDir, format);
 
-        // Execution asynchrone car je suis obligé de récupérer le titre avant de déclencher le téléchargement du fichier vers le client
         const rawTitle = execSync(`yt-dlp --get-title ${videoUrl}`).toString().trim()
-        const filename = rawTitle.replace(/[^\w\s()\[\]-]/g, "").replace(/\s+/g, " ")
+        const safeTitle = rawTitle.replace(/[^\w\s()\[\]-]/g, "").replace(/\s+/g, " ")
 
-        res.download(tmpFile, `${filename}.${format}`, err => {
-          if (err) {
-            res.status(500).json({ error: "Error sending file" }); 
-          }
+        const files = fs.readdirSync(tmpDir);
+        const downloadedFile = path.join(tmpDir, files[0]);
+        const extension = path.extname(downloadedFile)
+
+        res.download(downloadedFile, safeTitle + extension, (err) => {
+            if (err) {
+                res.status(500).json({ error: "Error sending file" });
+            }
         });
       }
       catch (err) {
-        // console.log(err.message)
         res.status(500).json({error: err.message})
       }
       finally {

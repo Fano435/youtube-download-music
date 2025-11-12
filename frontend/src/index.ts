@@ -27,9 +27,6 @@ async function downloadAudio(url: string, format: string) {
     }
 
     const contentDisposition = response.headers.get("Content-Disposition");
-    // const total = Number(response.headers.get("Content-Length") ?? 0);
-    // console.log(contentDisposition, total);
-
     const reader = response.body?.getReader();
     if (!reader) throw new Error("No readable stream returned by response");
 
@@ -43,7 +40,8 @@ async function downloadAudio(url: string, format: string) {
             chunks.push(value);
         }
     }
-    const blob = new Blob(chunks, { type: "audio/mpeg" });
+    
+    const blob = new Blob(chunks, { type: "application/octet-stream" });
     const blobUrl = window.URL.createObjectURL(blob);
     const filename = getFileNameFrom(contentDisposition);
 
@@ -72,7 +70,6 @@ form.addEventListener("submit", async (e) => {
 
         statusMsg.textContent = "Téléchargement terminé !";
     } catch (err) {
-        console.log(err);
         statusMsg.textContent = `${err}`;
     } finally {
         page.classList.remove("non-clickable");

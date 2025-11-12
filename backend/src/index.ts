@@ -7,6 +7,7 @@ const port = 3000;
 
 app.use(
     cors({
+        origin: ["http://localhost:5173", "https://yt-dl-web-v1.onrender.com"], // front dev + prod
         exposedHeaders: ["Content-Disposition"],
     })
 );

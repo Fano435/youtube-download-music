@@ -1,59 +1,51 @@
-import { ChildProcessWithoutNullStreams, spawn } from "child_process";
+import { spawn } from "child_process";
 import { MAXSIZE } from "../routes/convert.js";
+import fs from "fs";
+import path from "path";
 
 export function download(
     videoUrl: string,
-    tmpFile: string,
+    tmpDir: string,
     format: string
 ): Promise<void> {
     return new Promise((resolve, reject) => {
-        let process: ChildProcessWithoutNullStreams;
-        if (format == "mp3" || format == "m4a") {
-            process = spawn("yt-dlp", [
-                "--no-playlist",
-                "--max-filesize",
-                MAXSIZE,
-                "-f",
-                "bestaudio",
-                "--check-formats",
-                "-x",
-                "--audio-format",
-                format,
-                "-o",
-                tmpFile,
-                videoUrl,
-            ]);
-        } else if (format == "mp4") {
-            process = spawn("yt-dlp", [
-                "-S",
-                "ext",
-                "--no-playlist",
-                "--max-filesize",
-                MAXSIZE,
-                "-o",
-                tmpFile,
-                videoUrl,
-            ]);
-        }
+        const baseArgs = [
+            "--no-playlist",
+            "--max-filesize",
+            MAXSIZE,
+            "-P",
+            tmpDir,
+            videoUrl,
+        ];
+
+        const formatArgs: Record<string, string[]> = {
+            mp3: ["-x", "--audio-format", "mp3"],
+            m4a: ["-x", "--audio-format", "m4a"],
+            mp4: ["--format-sort", "vext", "--check-formats"],
+        };
+
+        const downloadArgs = [...baseArgs, ...(formatArgs[format] || [])];
+
+        const child = spawn("yt-dlp", downloadArgs);
 
         let stdmsg = "";
         let error = "";
 
-        process.stdout.on("data", (data) => {
+        child.stdout.on("data", (data) => {
             stdmsg += data.toString();
         });
 
-        process.stderr.on("data", (data) => {
+        child.stderr.on("data", (data) => {
             error += data.toString();
         });
 
-        process.on("error", (err) => {
+        child.on("error", (err) => {
             reject(new Error(`Failed to start yt-dlp: ${err.message}`));
-            process.kill();
+            child.kill();
         });
 
         // TO-DO: improve error parsing to display a clear message to the user
-        process.on("close", (code) => {
+        child.on("close", (code) => {
             const parsed = stdmsg.toLocaleLowerCase();
             if (parsed.includes("aborting")) {
                 const reason = parsed
